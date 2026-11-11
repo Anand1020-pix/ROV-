@@ -11,7 +11,7 @@ built for **ROS 2 Jazzy** and **Gazebo Harmonic**
 ![Status](https://img.shields.io/badge/status-simulation_only-blue)
 ![Safety](https://img.shields.io/badge/hardware-not_certified-red)
 
-[Quick Start](#quick-start) · [Architecture](#system-architecture) · [Teleop](#keyboard-teleop) · [Collection](#sediment-collection) · [Fail-safes](#fail-safe-tests) · [Parameters](#parameter-reference)
+[Quick Start](#quick-start) · [Demo](#sediment-collection-demo) · [Architecture](#system-architecture) · [Teleop](#keyboard-teleop) · [Collection](#sediment-collection) · [Fail-safes](#fail-safe-tests) · [Parameters](#parameter-reference)
 
 </div>
 
@@ -20,17 +20,18 @@ built for **ROS 2 Jazzy** and **Gazebo Harmonic**
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Safety and fidelity notice](#safety-and-fidelity-notice)
-3. [Quick start](#quick-start)
-4. [Seabed collection scene](#seabed-collection-scene)
-5. [System architecture](#system-architecture)
-6. [Thruster control interface](#thruster-control-interface)
-7. [Keyboard teleop](#keyboard-teleop)
-8. [Sediment collection](#sediment-collection)
-9. [Fail-safe tests](#fail-safe-tests)
-10. [Parameter reference](#parameter-reference)
-11. [Physics model](#physics-model)
-12. [Debugging](#debugging)
+2. [Sediment collection demo](#sediment-collection-demo)
+3. [Safety and fidelity notice](#safety-and-fidelity-notice)
+4. [Quick start](#quick-start)
+5. [Seabed collection scene](#seabed-collection-scene)
+6. [System architecture](#system-architecture)
+7. [Thruster control interface](#thruster-control-interface)
+8. [Keyboard teleop](#keyboard-teleop)
+9. [Sediment collection](#sediment-collection)
+10. [Fail-safe tests](#fail-safe-tests)
+11. [Parameter reference](#parameter-reference)
+12. [Physics model](#physics-model)
+13. [Debugging](#debugging)
 
 ---
 
@@ -48,6 +49,18 @@ built for **ROS 2 Jazzy** and **Gazebo Harmonic**
 - **Four vectored horizontal thrusters** for surge, sway and yaw
 - **Two vertical thrusters** for heave and pitch
 - Roll is **not** independently controllable with this layout
+
+---
+
+## Sediment collection demo
+
+The video shows the simulated ROV approaching a seabed target, running the collection sequence,
+retracting, and returning toward its starting position. Click the preview to open the full video:
+
+[![Watch the ROV sediment collection simulation demo](demo/Demo-preview.jpg)](demo/Demo.mp4)
+
+*Simulation-only video. Sediment removal is a visual effect, not physical particle transport
+or tank filling. Duration: 59 seconds resolution: 1280 × 720.*
 
 ---
 
@@ -186,7 +199,7 @@ flowchart LR
   User -->|fault injection| Sensors
   User -->|"/rov/emergency_stop"| Controller
   User -->|"/rov/emergency_stop"| Server
-  Server -.->|"safe stop on failure;<br/>return only if recoverable"| Controller
+  Server -.->|"safe stop on failure<br/>return only if recoverable"| Controller
   Server -->|"/rov/sim/remove_sediment"<br/>after successful collection and return| SimBridge
   SimBridge -->|Gazebo remove service| World
   Server -->|target_removed| Map
@@ -217,8 +230,8 @@ Input is a body-frame `geometry_msgs/msg/WrenchStamped` on `/rov/cmd_wrench`. Th
 |---|---|---|
 | `/rov/arm` | `std_msgs/Bool` | Arm only after a fresh wrench command is present |
 | `/rov/emergency_stop` | `std_msgs/Bool` | Latches E-stop and immediately commands zero thrust |
-| `/rov/reset_estop` | `std_msgs/Bool` | Clears the latch only after E-stop input is released; manual re-arm required |
-| Command watchdog | — | Stale wrench command disarms and zeros all thrusters; manual re-arm required |
+| `/rov/reset_estop` | `std_msgs/Bool` | Clears the latch only after E-stop input is released; manual re-arm is required |
+| Command watchdog | — | A stale wrench command disarms and zeros all thrusters; manual re-arm is required |
 | Non-finite wrench | — | Latches control fault and disarms |
 | Thrust saturation | — | Per-thruster, default ±20 N |
 
@@ -257,7 +270,8 @@ Defaults are deliberately low: **1 N** linear force and **0.1 N·m** pitch/yaw t
 | `Space` | **STOP**: clear all motion commands and disarm |
 | `Esc` / `Ctrl+C` | Stop and exit |
 
-Each key sets its axis until the opposite key is pressed; different axes combine (e.g. `W` then `A` commands forward-left). The controller arms on the first movement key.
+Each key sets its axis until the opposite key is pressed. Different axes combine (e.g. `W` then
+`A` commands forward-left). The controller arms on the first movement key.
 
 > [!TIP]
 > Keep the teleop terminal visible, test in clear simulation space, and press `Space` before leaving the ROV unattended. If the teleop process exits unexpectedly, the 0.30 s wrench watchdog should disarm the controller.
@@ -276,7 +290,8 @@ ros2 run rov_underwater_control rov_teleop --ros-args \
 > [!IMPORTANT]
 > These commands are for **simulation only**. The action moves the ROV to the selected target, runs the simulated vacuum sequence, and removes the target's visual model only on success. Do **not** run teleop or any other wrench publisher while the collection action is active.
 
-**Prerequisite:** start the [seabed collection scene](#seabed-collection-scene) and [activate both lifecycle nodes](#4-activate-the-lifecycle-nodes).
+**Prerequisite:** start the [seabed collection scene](#seabed-collection-scene) and
+[activate both lifecycle nodes](#4-activate-the-lifecycle-nodes).
 
 ### Targets
 
@@ -313,7 +328,9 @@ flowchart LR
 After vacuuming, the action turns off the pump, closes the valve, raises the ROV by 0.5 m, and returns it to where the goal began. Feedback reports `RETRACTING` and `RETURNING_HOME`. The target is removed from Gazebo and RViz only after **both** collection and return succeed. Only the ROV's position is restored, not its orientation.
 
 > [!NOTE]
-> Each successful collection removes that target from the current simulation. Do not send a goal for an already collected target; a missing target is reported as an action failure. To restore all eight targets, stop and relaunch `seabed_collection.launch.py`.
+> Each successful collection removes that target from the current simulation. Do not send a goal
+> for an already collected target; a missing target is reported as an action failure. To restore
+> all eight targets, stop and relaunch `seabed_collection.launch.py`.
 
 ---
 
@@ -323,10 +340,11 @@ The following abort the action: leak / E-stop, stale sensors or pose, controller
 
 | Failure type | Result |
 |---|---|
-| **Recoverable** (e.g. stale sensors, timeout, drift) | Pump off, valve closed, bounded retract and return to start. Feedback: `FAILSAFE_RETRACTING`, `FAILSAFE_RETURNING_HOME`. Action reports failure; target remains. |
+| **Recoverable** (e.g. stale sensors, timeout, drift) | Pump off, valve closed, then a bounded retract and return to start. Feedback: `FAILSAFE_RETRACTING`, `FAILSAFE_RETURNING_HOME`. The action reports failure; the target remains. |
 | **Non-recoverable** (leak, E-stop, cancel, stale pose, controller loss, deactivation) | No automatic movement. ROV stops and disarms in place. |
 
-Every terminal outcome leaves the **pump off, valve closed, wrench zeroed, and controller disarmed**. Safety checks stay active during both normal and fail-safe return.
+Every terminal outcome leaves the **pump off, valve closed, wrench zeroed, and controller
+disarmed**. Safety checks remain active during normal and fail-safe returns.
 
 ### Monitor outputs
 
@@ -355,7 +373,8 @@ While feedback reports `VACUUMING`, inject a leak from another terminal:
 ros2 topic pub --once /rov/sim/inject_leak std_msgs/msg/Bool "{data: true}"
 ```
 
-**Expected:** the goal aborts; pump and valve report `false`, the controller is disarmed, and the target remains in Gazebo/RViz.
+**Expected:** the goal aborts; the pump and valve report `false`, the controller is disarmed,
+and the target remains in Gazebo/RViz.
 
 Clear the leak before another goal:
 
@@ -374,7 +393,9 @@ Disable sensor updates while a goal is active:
 ros2 topic pub --once /rov/sim/disable_collection_sensors std_msgs/msg/Bool "{data: true}"
 ```
 
-**Expected:** the goal aborts when pressure/flow data goes stale. If pose and controller remain healthy, the ROV attempts a bounded return to its start; the goal stays aborted and the target is not removed.
+**Expected:** the goal aborts when pressure/flow data goes stale. If pose and controller remain
+healthy, the ROV attempts a bounded return to its start. The action stays aborted and the target
+is not removed.
 
 Re-enable the streams and wait for fresh readings before the next goal:
 
@@ -406,30 +427,32 @@ ros2 topic pub --once /rov/reset_estop std_msgs/msg/Bool "{data: true}"
 
 ## Parameter reference
 
-Declared ROS parameters, action goal inputs, launch arguments, and fixed simulation values. Values marked **fixed** live in source, Xacro, or SDF and are not ROS parameters. `collection_sensor_sim`, `rov_sim_bridge`, and `seabed_map_publisher` declare no ROS parameters.
+This reference lists the declared ROS parameters, action goal inputs, launch arguments, and fixed
+simulation values. Fixed values live in source, Xacro, or SDF and are not ROS parameters.
+`collection_sensor_sim`, `rov_sim_bridge`, and `seabed_map_publisher` declare no ROS parameters.
 
 ### ROS node parameters
 
 | Node | Parameter | Default | Unit | Description |
 |---|---|---:|:---:|---|
 | `/rov_thruster_controller` | `command_timeout_sec` | `0.30` | s | Stale wrench watchdog; disarms and zeros thrusters |
-| `/rov_thruster_controller` | `max_horizontal_thrust_n` | `20.0` | N | Per-thruster saturation, four horizontal thrusters |
-| `/rov_thruster_controller` | `max_vertical_thrust_n` | `20.0` | N | Per-thruster saturation, two vertical thrusters |
-| `/rov_thruster_controller` | `horizontal_arm_x_m` | `0.22` | m | Horizontal thruster lever arm for allocation |
-| `/rov_thruster_controller` | `horizontal_arm_y_m` | `0.18` | m | Horizontal thruster lever arm for allocation |
-| `/rov_thruster_controller` | `vertical_arm_x_m` | `0.16` | m | Vertical thruster lever arm for pitch allocation |
-| `/rov_thruster_controller` | `publish_rate_hz` | `50.0` | Hz | Controller output update rate |
-| `/sediment_collection_server` | `sensor_timeout_sec` | `0.75` | s | Max age of pressure/flow samples |
-| `/sediment_collection_server` | `pose_timeout_sec` | `0.5` | s | Max age of the Gazebo vehicle pose |
-| `/sediment_collection_server` | `maximum_vacuum_kpa` | `55.0` | kPa | Abort limit; goal target vacuum cannot exceed this |
-| `/sediment_collection_server` | `minimum_flow_lpm` | `0.1` | L/min | Abort if flow falls below this while collecting |
-| `/sediment_collection_server` | `vacuum_acquisition_timeout_sec` | `6.0` | s | Time allowed to reach requested target vacuum |
-| `/sediment_collection_server` | `maximum_nozzle_error_m` | `0.10` | m | Position tolerance for approach/return settling |
-| `/sediment_collection_server` | `maximum_collection_drift_m` | `0.20` | m | Max nozzle drift allowed during collection |
-| `/rov_teleop` | `linear_force_n` | `1.0` | N | Force used by W/S, A/D, Q/E |
-| `/rov_teleop` | `pitch_torque_nm` | `0.1` | N·m | Torque used by I/K |
-| `/rov_teleop` | `yaw_torque_nm` | `0.1` | N·m | Torque used by J/L |
-| `robot_state_publisher` | `use_sim_time` | `true` (sim launch) | bool | Uses Gazebo `/clock`; display launch defaults to `false` |
+| `/rov_thruster_controller` | `max_horizontal_thrust_n` | `20.0` | N | Per-thruster saturation for the four horizontal thrusters. |
+| `/rov_thruster_controller` | `max_vertical_thrust_n` | `20.0` | N | Per-thruster saturation for the two vertical thrusters. |
+| `/rov_thruster_controller` | `horizontal_arm_x_m` | `0.22` | m | Horizontal thruster lever arm for allocation. |
+| `/rov_thruster_controller` | `horizontal_arm_y_m` | `0.18` | m | Horizontal thruster lever arm for allocation. |
+| `/rov_thruster_controller` | `vertical_arm_x_m` | `0.16` | m | Vertical thruster lever arm for pitch allocation. |
+| `/rov_thruster_controller` | `publish_rate_hz` | `50.0` | Hz | Controller output update rate. |
+| `/sediment_collection_server` | `sensor_timeout_sec` | `0.75` | s | Maximum age allowed for pressure/flow samples. |
+| `/sediment_collection_server` | `pose_timeout_sec` | `0.5` | s | Maximum age allowed for the Gazebo vehicle pose. |
+| `/sediment_collection_server` | `maximum_vacuum_kpa` | `55.0` | kPa | Abort limit; goal target vacuum cannot exceed this. |
+| `/sediment_collection_server` | `minimum_flow_lpm` | `0.1` | L/min | Abort if flow falls below this while collecting. |
+| `/sediment_collection_server` | `vacuum_acquisition_timeout_sec` | `6.0` | s | Time allowed to reach the requested target vacuum. |
+| `/sediment_collection_server` | `maximum_nozzle_error_m` | `0.10` | m | Position tolerance for approach/return settling. |
+| `/sediment_collection_server` | `maximum_collection_drift_m` | `0.20` | m | Maximum nozzle drift allowed during collection. |
+| `/rov_teleop` | `linear_force_n` | `1.0` | N | Force used by W/S, A/D, and Q/E. |
+| `/rov_teleop` | `pitch_torque_nm` | `0.1` | N·m | Torque used by I/K. |
+| `/rov_teleop` | `yaw_torque_nm` | `0.1` | N·m | Torque used by J/L. |
+| `robot_state_publisher` | `use_sim_time` | `true` (simulation launch) | bool | Uses Gazebo `/clock`; the display launch defaults to `false`. |
 
 Inspect parameters on running nodes:
 
@@ -441,7 +464,7 @@ ros2 param dump /sediment_collection_server
 
 ### Collection action goal fields
 
-Every goal must set each field explicitly. "README value" is what the commands above use.
+Every goal must set each field explicitly. The README values below match the example command.
 
 | Field | README value | Valid range / rule | Unit | Description |
 |---|---:|---|:---:|---|
@@ -481,7 +504,7 @@ Every goal must set each field explicitly. "README value" is what the commands a
 | Map resolution / size | `0.1 m`, `120 × 120` cells | Origin `(-6, -6) m` in `world` |
 | Seabed floor height | `-2.9 m` | Map and target reference floor |
 | Sensor sim update period | `0.05 s` | 20 Hz pressure, flow and leak updates |
-| Simulated vacuum | `+1.8 kPa/tick` pump+valve on; `-2.5 kPa/tick` otherwise; clamped `0–40 kPa` | Test-double behavior only |
+| Simulated vacuum | `+1.8 kPa/tick` pump+valve on; `-2.5 kPa/tick` otherwise clamped `0–40 kPa` | Test-double behavior only |
 | Simulated flow | `2.0 L/min` pump+valve on; else `0.0` | Test-double behavior only |
 | Position gain | `4.0` horizontal, `8.0` vertical | Approach/return feedback |
 | Velocity damping | `8.0` horizontal, `10.0` vertical | Applied to measured velocity |
@@ -506,7 +529,8 @@ Every goal must set each field explicitly. "README value" is what the commands a
 
 <br>
 
-Xacro values defining the simulated body and component placement. Positions are relative to the parent link unless noted.
+These Xacro values define the simulated body and component placement. Positions are relative to
+the parent link unless noted.
 
 | Component | Mass | Geometry / position |
 |---|---:|---|
@@ -584,6 +608,6 @@ ros2 topic echo /robot_description --qos-durability transient_local --once
 
 <div align="center">
 
-<sub>Simulation baseline · not for direct use on physical vehicles · see the <a href="#%EF%B8%8F-safety-and-fidelity-notice">safety notice</a></sub>
+<sub>Simulation baseline · not for direct use on physical vehicles · see the <a href="#safety-and-fidelity-notice">safety notice</a></sub>
 
 </div>
