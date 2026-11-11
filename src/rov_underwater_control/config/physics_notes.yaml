@@ -1,0 +1,7 @@
+# Reference values used by the starter model.
+# Buoyancy is configured in rov_bringup/worlds/underwater_test_world.sdf.
+fluid_density_kg_m3: 1025.0
+
+# Hydrodynamic damping is configured in rov_description/urdf/rov.urdf.xacro.
+# These are initial simulation coefficients, not measured vehicle coefficients.
+# Re-identify from CAD, towing tests, or controlled simulation before using for research.

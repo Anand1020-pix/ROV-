@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="sensor_frame" params="name xyz rpy">
+    <link name="${name}">
+      <visual><geometry><sphere radius="0.018"/></geometry>
+        <material name="sensor_blue"><color rgba="0.05 0.45 0.85 1"/></material>
+      </visual>
+      <inertial><mass value="0.02"/><inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/></inertial>
+    </link>
+    <joint name="${name}_mount_joint" type="fixed">
+      <parent link="base_link"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="rov_sensors">
+    <xacro:sensor_frame name="camera_link" xyz="0.225 0 0.015" rpy="0 0 0"/>
+    <xacro:sensor_frame name="forward_sonar_link" xyz="0.205 0 0.035" rpy="0 0 0"/>
+    <xacro:sensor_frame name="imu_link" xyz="0 0 0.095" rpy="0 0 0"/>
+    <xacro:sensor_frame name="pressure_sensor_link" xyz="-0.12 0 0.105" rpy="0 0 0"/>
+    <xacro:sensor_frame name="leak_sensor_link" xyz="0 0 -0.065" rpy="0 0 0"/>
+  </xacro:macro>
+</robot>

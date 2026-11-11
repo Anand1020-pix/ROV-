@@ -1,0 +1,16 @@
+# Goal: target_id selects sediment_01..sediment_08 in the seabed simulation.
+uint8 target_id
+float32 target_vacuum_kpa
+float32 collection_duration_sec
+float32 max_duration_sec
+float32 approach_timeout_sec
+---
+bool success
+float32 collected_duration_sec
+float32 final_vacuum_kpa
+string message
+---
+string state
+float32 elapsed_sec
+float32 vacuum_kpa
+float32 flow_lpm

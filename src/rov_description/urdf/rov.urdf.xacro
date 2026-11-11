@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sediment_collector_rov">
+  <xacro:arg name="use_sim" default="true"/>
+  <xacro:include filename="$(find rov_description)/urdf/rov_base.xacro"/>
+  <xacro:include filename="$(find rov_description)/urdf/thrusters.xacro"/>
+  <xacro:include filename="$(find rov_description)/urdf/sensors.xacro"/>
+  <xacro:include filename="$(find rov_description)/urdf/sediment_collection.xacro"/>
+
+  <xacro:rov_base/>
+  <xacro:rov_thrusters/>
+  <xacro:rov_sensors/>
+  <xacro:sediment_sampler/>
+
+  <!-- Gazebo Harmonic model-level hydrodynamic damping. Coefficients are initial tuning values,
+       not experimentally identified vehicle coefficients. -->
+  <gazebo>
+    <plugin filename="gz-sim-hydrodynamics-system" name="gz::sim::systems::Hydrodynamics">
+      <link_name>base_link</link_name>
+      <xUabsU>-0.8</xUabsU><xU>-4.0</xU>
+      <yVabsV>-1.8</yVabsV><yV>-6.0</yV>
+      <zWabsW>-4.0</zWabsW><zW>-8.0</zW>
+      <kPabsP>-0.15</kPabsP><kP>-0.8</kP>
+      <mQabsQ>-0.15</mQabsQ><mQ>-0.8</mQ>
+      <nRabsR>-0.20</nRabsR><nR>-1.0</nR>
+    </plugin>
+  </gazebo>
+</robot>

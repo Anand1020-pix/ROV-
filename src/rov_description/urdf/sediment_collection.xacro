@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="payload_box" params="name size mass rgba">
+    <link name="${name}">
+      <visual><geometry><box size="${size}"/></geometry>
+        <material name="${name}_mat"><color rgba="${rgba}"/></material>
+      </visual>
+      <collision><geometry><box size="${size}"/></geometry></collision>
+      <inertial><mass value="${mass}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="sediment_sampler">
+    <link name="collection_mount_link">
+      <visual><geometry><box size="0.20 0.16 0.025"/></geometry>
+        <material name="mount_mat"><color rgba="0.18 0.20 0.22 1"/></material>
+      </visual>
+      <collision><geometry><box size="0.20 0.16 0.025"/></geometry></collision>
+      <inertial><mass value="0.25"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+    <joint name="collection_mount_joint" type="fixed">
+      <parent link="frame_link"/><child link="collection_mount_link"/>
+      <origin xyz="0.08 0 -0.055" rpy="0 0 0"/>
+    </joint>
+
+    <xacro:payload_box name="pump_link" size="0.12 0.10 0.09" mass="0.65" rgba="0.22 0.25 0.28 1"/>
+    <joint name="pump_fixed_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="pump_link"/>
+      <origin xyz="-0.10 0 0.015" rpy="0 0 0"/>
+    </joint>
+
+    <xacro:payload_box name="sediment_tank_link" size="0.22 0.15 0.12" mass="1.0" rgba="0.72 0.76 0.78 0.75"/>
+    <joint name="sediment_tank_fixed_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="sediment_tank_link"/>
+      <origin xyz="0.02 0 -0.015" rpy="0 0 0"/>
+    </joint>
+
+    <link name="suction_pipe_link">
+      <visual><geometry><cylinder radius="0.018" length="0.22"/></geometry>
+        <material name="pipe_mat"><color rgba="0.85 0.82 0.18 1"/></material>
+      </visual>
+      <collision><geometry><box size="0.033 0.033 0.2055"/></geometry></collision>
+      <inertial><mass value="0.08"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+    </link>
+    <joint name="suction_pipe_fixed_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="suction_pipe_link"/>
+      <origin xyz="0.13 0 -0.12" rpy="0 1.5708 0"/>
+    </joint>
+
+    <link name="collection_nozzle_link">
+      <visual><geometry><cylinder radius="0.035" length="0.07"/></geometry>
+        <material name="nozzle_mat"><color rgba="0.10 0.12 0.14 1"/></material>
+      </visual>
+      <collision><geometry><box size="0.064 0.064 0.0658"/></geometry></collision>
+      <inertial><mass value="0.12"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+    </link>
+    <joint name="collection_nozzle_fixed_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="collection_nozzle_link"/>
+      <origin xyz="0.22 0 -0.23" rpy="0 0 0"/>
+    </joint>
+
+    <link name="collection_pressure_link">
+      <inertial><mass value="0.01"/><inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/></inertial>
+    </link>
+    <joint name="collection_pressure_mount_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="collection_pressure_link"/>
+      <origin xyz="-0.02 0.06 0.02" rpy="0 0 0"/>
+    </joint>
+    <link name="collection_flow_link">
+      <inertial><mass value="0.01"/><inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/></inertial>
+    </link>
+    <joint name="collection_flow_mount_joint" type="fixed">
+      <parent link="collection_mount_link"/><child link="collection_flow_link"/>
+      <origin xyz="0.04 0.06 0.02" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>

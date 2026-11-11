@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="thruster" params="name xyz rpy">
+    <link name="${name}_link">
+      <visual><geometry><cylinder radius="0.045" length="0.13"/></geometry>
+        <material name="thruster_grey"><color rgba="0.25 0.28 0.30 1"/></material>
+      </visual>
+      <collision><geometry><box size="0.0707 0.09 0.13"/></geometry></collision>
+      <inertial><mass value="0.35"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+    <joint name="${name}_fixed_joint" type="fixed">
+      <parent link="frame_link"/><child link="${name}_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- Propeller shaft. The local +Z joint axis is rotated into each thruster's thrust direction. -->
+    <link name="${name}_propeller_link">
+      <visual><geometry><cylinder radius="0.035" length="0.008"/></geometry>
+        <material name="propeller_grey"><color rgba="0.65 0.68 0.70 1"/></material>
+      </visual>
+      <inertial><mass value="0.03"/><inertia ixx="0.00002" ixy="0" ixz="0" iyy="0.00002" iyz="0" izz="0.00002"/></inertial>
+    </link>
+    <joint name="${name}_propeller_joint" type="continuous">
+      <parent link="${name}_link"/><child link="${name}_propeller_link"/>
+      <origin xyz="0 0 0.065" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+
+    <!-- Gazebo Harmonic native maritime thruster system: command is thrust in Newtons. -->
+    <gazebo>
+      <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
+        <namespace>sediment_collector_rov</namespace>
+        <joint_name>${name}_propeller_joint</joint_name>
+        <fluid_density>1025</fluid_density>
+        <propeller_diameter>0.07</propeller_diameter>
+        <thrust_coefficient>1.0</thrust_coefficient>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="rov_thrusters">
+    <!-- Four horizontal vectored thrusters. RPY rotates local +Z into the XY plane. -->
+    <xacro:thruster name="front_left_thruster"  xyz="0.22 0.18 -0.015" rpy="0 1.5707963 0.7853982"/>
+    <xacro:thruster name="front_right_thruster" xyz="0.22 -0.18 -0.015" rpy="0 1.5707963 -0.7853982"/>
+    <xacro:thruster name="rear_left_thruster"   xyz="-0.22 0.18 -0.015" rpy="0 1.5707963 -0.7853982"/>
+    <xacro:thruster name="rear_right_thruster"  xyz="-0.22 -0.18 -0.015" rpy="0 1.5707963 0.7853982"/>
+    <!-- Two vertical thrusters: heave and pitch control. This 6-thruster layout does not independently control roll. -->
+    <xacro:thruster name="vertical_front_thruster" xyz="0.16 0 -0.015" rpy="0 0 0"/>
+    <xacro:thruster name="vertical_rear_thruster"  xyz="-0.16 0 -0.015" rpy="0 0 0"/>
+  </xacro:macro>
+</robot>

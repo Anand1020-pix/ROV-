@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>rov_underwater_control</name>
+  <version>0.1.0</version>
+  <description>Lifecycle ROV controllers, terminal teleop and simulated sampler sensors.</description>
+  <maintainer email="maintainer@example.com">ROV Project</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>rov_interfaces</depend>
+  <depend>tf2_msgs</depend>
+  <depend>ros_gz_sim</depend>
+  <exec_depend>lifecycle_msgs</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

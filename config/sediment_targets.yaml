@@ -1,0 +1,21 @@
+frame_id: map
+seabed_surface_z: -2.90
+targets:
+  - id: sediment_001
+    x: -6.00
+    y: -4.00
+    z: -2.90
+    radius: 0.30
+    status: available
+  - id: sediment_002
+    x: 0.00
+    y: 0.00
+    z: -2.90
+    radius: 0.35
+    status: available
+  - id: sediment_003
+    x: 6.00
+    y: 4.00
+    z: -2.90
+    radius: 0.30
+    status: available
