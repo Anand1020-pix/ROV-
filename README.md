@@ -54,10 +54,12 @@ built for **ROS 2 Jazzy** and **Gazebo Harmonic**
 
 ## Sediment collection demo
 
-[![ROV sediment collection demo](https://img.youtube.com/vi/v6m_l8OH9Z0/hqdefault.jpg)](https://youtu.be/v6m_l8OH9Z0)
+https://github.com/user-attachments/assets/e1ef99ea-04d1-49b9-b7ca-0ee1cfd7353e
 
-Click the preview to watch the simulated ROV approach a seabed target, run the collection sequence,
-retract, and return toward its starting position.
+If the video doesn’t play, [watch it on YouTube](https://youtu.be/v6m_l8OH9Z0).
+
+Watch the simulated ROV approach a seabed target, run the collection sequence, retract, and return toward its starting position.
+
 
 *Simulation only: sediment removal is a visual effect, not physical particle transport or tank
 filling.*
